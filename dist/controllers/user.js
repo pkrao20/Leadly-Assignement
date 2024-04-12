@@ -168,6 +168,7 @@ const Login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.Login = Login;
 const emailVerfication = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    setError();
     const { token } = req.query;
     if (token && typeof token === 'string') {
         const emailVerificationToken = crypto_1.default.createHash('sha256').update(token).digest('hex');
@@ -175,12 +176,23 @@ const emailVerfication = (req, res) => __awaiter(void 0, void 0, void 0, functio
             emailVerificationToken,
             emailVerificationExpire: { $gt: Date.now() }
         });
+        if (!user) {
+            errors.token = "Invalid verification token";
+            return res.status(404).json({ errors });
+        }
+        user.isVerified = true;
+        user.emailVerficationToken = "";
+        user.emailVerificationExpire = 0;
+        yield user.save();
+        res.status(200).json({ message: "verified successfully" });
     }
     else {
-        return res.status(404).json({ errors: "invalid user" });
+        errors.token = "empty token";
+        return res.status(404).json({ errors });
     }
 });
 exports.emailVerfication = emailVerfication;
+// export 
 // edit user - change password , edit email // similarly we can implement for forget password
 // export const 
 //

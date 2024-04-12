@@ -171,6 +171,7 @@ export const Login = async (req: Request, res: Response) => {
 }
 
 export const emailVerfication = async(req:Request,res:Response)=>{
+    setError();
     const {token} = req.query;
     if( token && typeof token === 'string'){
         const emailVerificationToken = crypto.createHash('sha256').update(token).digest('hex');
@@ -178,13 +179,24 @@ export const emailVerfication = async(req:Request,res:Response)=>{
             emailVerificationToken,
             emailVerificationExpire: { $gt: Date.now() }
         });
+        if(!user){
+            errors.token = "Invalid verification token";
+            return res.status(404).json({errors});
+        }
+        user.isVerified = true;
+        user.emailVerficationToken = "";
+        user.emailVerificationExpire=0;
+        await user.save();
+        res.status(200).json({message:"verified successfully"});
+
     }else{
-        return res.status(404).json({errors:"invalid user"});
+        errors.token = "empty token";
+
+        return res.status(404).json({errors});
     }
 
-
-
 }
+// export 
 // edit user - change password , edit email // similarly we can implement for forget password
 // export const 
 //

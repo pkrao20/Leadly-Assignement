@@ -5,4 +5,5 @@ const user_1 = require("../controllers/user");
 const router = (0, express_1.Router)();
 router.post('/signup', user_1.Register);
 router.post('/signin', user_1.Login);
+router.post('/email-verification/:token', user_1.emailVerfication);
 exports.default = router;
