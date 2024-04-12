@@ -1,7 +1,8 @@
 import { Router } from "express";
 const router:Router = Router();
 import { AddNew ,GetAll} from "../controllers/product";
-router.post('/add',AddNew);
+import { verifyTokenMiddleware } from "../middlewares/middleware";
+router.post('/add',verifyTokenMiddleware,AddNew);
 
 router.get('/all',GetAll);
 

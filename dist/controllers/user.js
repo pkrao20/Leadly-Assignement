@@ -125,7 +125,7 @@ const Login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const auth = yield bcryptjs_1.default.compare(password, emailExist.password);
         if (auth) {
             if (process.env.JWT_SECRET) {
-                const token = jsonwebtoken_1.default.sign({ id: emailExist._id, email: emailOrUsername }, process.env.JWT_SECRET, { expiresIn: '24h' });
+                const token = jsonwebtoken_1.default.sign({ id: emailExist._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
                 return res.status(201).json({ token: token, user: emailExist });
             }
             else {
@@ -142,7 +142,7 @@ const Login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const auth = yield bcryptjs_1.default.compare(password, userNameExist.password);
         if (auth) {
             if (process.env.JWT_SECRET) {
-                const token = jsonwebtoken_1.default.sign({ id: userNameExist._id, email: userNameExist.email }, process.env.JWT_SECRET, { expiresIn: '24h' });
+                const token = jsonwebtoken_1.default.sign({ id: userNameExist._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
                 return res.status(201).json({ token: token, user: userNameExist });
             }
             else {

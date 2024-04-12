@@ -128,7 +128,7 @@ export const Login = async (req: Request, res: Response) => {
             const auth: boolean = await bcrypt.compare(password, emailExist.password);
             if (auth) {
                 if (process.env.JWT_SECRET) {
-                    const token: string = jwt.sign({ id: emailExist._id, email: emailOrUsername }, process.env.JWT_SECRET, { expiresIn: '24h' });
+                    const token: string = jwt.sign({ id: emailExist._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
                     return res.status(201).json({ token: token, user: emailExist });
                 } else {
                     console.log('empty jwt secret key');
@@ -144,7 +144,7 @@ export const Login = async (req: Request, res: Response) => {
             const auth: boolean = await bcrypt.compare(password, userNameExist.password);
             if (auth) {
                 if (process.env.JWT_SECRET) {
-                    const token: string = jwt.sign({ id:userNameExist._id, email: userNameExist.email }, process.env.JWT_SECRET, { expiresIn: '24h' });
+                    const token: string = jwt.sign({ id:userNameExist._id}, process.env.JWT_SECRET, { expiresIn: '24h' });
                     return res.status(201).json({ token: token, user: userNameExist });
                 } else {
 

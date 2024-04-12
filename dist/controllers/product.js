@@ -14,13 +14,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GetAll = exports.AddNew = void 0;
 const product_1 = __importDefault(require("../models/product"));
+const user_1 = __importDefault(require("../models/user"));
 const AddNew = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name, description, price, id } = req.body;
-    const product = new product_1.default({
-        name, description, price, addedBy: id
-    });
-    yield product.save();
-    return res.status(200).json({ message: "product saved successfully" });
+    const { name, description, price, email } = req.body;
+    const user = yield user_1.default.findOne({ email: email });
+    if (user) {
+        const product = new product_1.default({
+            name, description, price, addedBy: user._id
+        });
+        yield product.save();
+        return res.status(200).json({ message: "product saved successfully" });
+    }
+    else {
+        return res.status(404).json({ errors: "Unknown User" });
+    }
 });
 exports.AddNew = AddNew;
 const GetAll = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
