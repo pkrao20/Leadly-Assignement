@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifyTokenMiddleware = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const user_1 = __importDefault(require("../models/user")); // Assuming you have a User model
+const user_1 = __importDefault(require("../models/user"));
 function verifyTokenMiddleware(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         let token;
@@ -25,7 +25,7 @@ function verifyTokenMiddleware(req, res, next) {
             return res.status(401).json({ errors: { token: 'Not Authorized' } });
         }
         try {
-            const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET); // Assuming you have JWT_SECRET in your environment variables
+            const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
             const user = yield user_1.default.findOne({ _id: decoded.id });
             if (!user) {
                 return res.status(404).json({ errors: { token: 'User not found' } });

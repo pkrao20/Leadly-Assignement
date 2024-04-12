@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import  User  from '../models/user'; // Assuming you have a User model
+import  User  from '../models/user'; 
 import IUser from '../models/user'
 declare global {
   namespace Express {
     interface Request {
-      user?: any; // Adding a user property to the Request interface
+      user?: any; 
     }
   }
 }
@@ -22,7 +22,7 @@ export async function verifyTokenMiddleware(req: Request, res: Response, next: N
     }
 
     try {
-        const decoded: any = jwt.verify(token, process.env.JWT_SECRET!); // Assuming you have JWT_SECRET in your environment variables
+        const decoded: any = jwt.verify(token, process.env.JWT_SECRET!); 
 
         const user = await User.findOne({ _id: decoded.id });
 

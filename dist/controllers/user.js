@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Login = exports.Register = void 0;
+exports.emailVerfication = exports.Login = exports.Register = void 0;
 const user_1 = __importDefault(require("../models/user"));
 const crypto_1 = __importDefault(require("crypto"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
@@ -167,6 +167,20 @@ const Login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // }
 });
 exports.Login = Login;
+const emailVerfication = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { token } = req.query;
+    if (token && typeof token === 'string') {
+        const emailVerificationToken = crypto_1.default.createHash('sha256').update(token).digest('hex');
+        const user = yield user_1.default.findOne({
+            emailVerificationToken,
+            emailVerificationExpire: { $gt: Date.now() }
+        });
+    }
+    else {
+        return res.status(404).json({ errors: "invalid user" });
+    }
+});
+exports.emailVerfication = emailVerfication;
 // edit user - change password , edit email // similarly we can implement for forget password
 // export const 
 //
