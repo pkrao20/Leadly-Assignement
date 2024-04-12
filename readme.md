@@ -1,8 +1,16 @@
-
 starting this project-
-clone this repository
-go into main directly -  cd leadly
-enter command - npm install
-open a new terminal type command - npm run dev
-open another new terminal and run command - nodemon dist/index
-and server will start running
+1. Clone this repository.
+2. Go into the main directory: `cd leadly`.
+3. Enter the command: `npm install`.
+
+To start the development server:
+1. Open a new terminal.
+2. Type the command: `npm run dev`.
+
+To start the production server:
+1. Open another new terminal.
+2. Run the command: `nodemon dist/index`.
+
+Now, the server will start running.
+Apis being used in this project
+1. 
