@@ -10,12 +10,12 @@ import jwt from 'jsonwebtoken';
 // import { register } from 'module';
 const client = new OAuth2Client();
 
-let errors: { email: string, password: string, username: string, token: string,internalserver:string } = {
+let errors: { email: string, password: string, username: string, token: string, internalserver: string } = {
     email: "",
     password: "",
     username: "",
     token: "",
-    internalserver:"",
+    internalserver: "",
 };
 const setError = () => {
     errors = {
@@ -23,7 +23,7 @@ const setError = () => {
         password: "",
         username: "",
         token: "",
-        internalserver:""
+        internalserver: ""
     };
 };
 
@@ -44,30 +44,30 @@ export const Register = async (req: Request, res: Response) => {
         }
 
         // if (authMode === 'email') {
-            const salt: string = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash(password, salt);
-            const user: IUser = new User({
-                name, username, email, password: hashedPassword, authMode: ['Email']
-            });
-            const verificationToken: string = crypto.randomBytes(20).toString('hex');
-            user.emailVerficationToken = crypto.createHash('sha256').update(verificationToken).digest('hex');
-            // console.log(new Date(Date.now() + (24 * 60 * 60 * 1000)));
-            user.emailVerificationExpire = Date.now() + (24 * 60 * 60 * 1000);
-            await user.save();
-            setError();
-            const verificationUrl: string = `http://localhost:8000/auth/email-verification/${verificationToken}`;
-            const message: string = `<h2>Thank you for registering with us </h2>
+        const salt: string = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+        const user: IUser = new User({
+            name, username, email, password: hashedPassword, authMode: ['Email']
+        });
+        const verificationToken: string = crypto.randomBytes(20).toString('hex');
+        user.emailVerficationToken = crypto.createHash('sha256').update(verificationToken).digest('hex');
+        // console.log(new Date(Date.now() + (24 * 60 * 60 * 1000)));
+        user.emailVerificationExpire = Date.now() + (24 * 60 * 60 * 1000);
+        await user.save();
+        setError();
+        const verificationUrl: string = `http://localhost:8000/auth/email-verification/${verificationToken}`;
+        const message: string = `<h2>Thank you for registering with us </h2>
             <p> Please click the below button to verify your email </p>
             <button> <a href=${verificationUrl} clicktracking=off> Verify Email </a> </button>
             `;
 
-            await sendEmail({
-                to: user.email,
-                subject: 'Registered Successfully',
-                html: message
-            });
-            
-            return res.status(200).json({ message: "registered successfully" });
+        await sendEmail({
+            to: user.email,
+            subject: 'Registered Successfully',
+            html: message
+        });
+
+        return res.status(200).json({ message: "registered successfully" });
         // }
         // else{
 
@@ -124,80 +124,113 @@ export const Login = async (req: Request, res: Response) => {
     setError();
     // if (authMode === 'email') {
 
-        if (emailExist && emailExist.isVerified) {
-            const auth: boolean = await bcrypt.compare(password, emailExist.password);
-            if (auth) {
-                if (process.env.JWT_SECRET) {
-                    const token: string = jwt.sign({ id: emailExist._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
-                    return res.status(201).json({ token: token, user: emailExist });
-                } else {
-                    console.log('empty jwt secret key');
-                    return res.status(500).json({ error: "internal server error" });
-                }
+    if (emailExist && emailExist.isVerified) {
+        const auth: boolean = await bcrypt.compare(password, emailExist.password);
+        if (auth) {
+            if (process.env.JWT_SECRET) {
+                const token: string = jwt.sign({ id: emailExist._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
+                return res.status(201).json({ token: token, user: emailExist });
             } else {
-                errors.password = "wrong password";
-                return res.status(404).json({ errors });
+                console.log('empty jwt secret key');
+                return res.status(500).json({ error: "internal server error" });
             }
-
+        } else {
+            errors.password = "wrong password";
+            return res.status(404).json({ errors });
         }
-        else if (userNameExist && userNameExist.isVerified) {
-            const auth: boolean = await bcrypt.compare(password, userNameExist.password);
-            if (auth) {
-                if (process.env.JWT_SECRET) {
-                    const token: string = jwt.sign({ id:userNameExist._id}, process.env.JWT_SECRET, { expiresIn: '24h' });
-                    return res.status(201).json({ token: token, user: userNameExist });
-                } else {
 
-                    console.log('empty jwt secret key');
-                    errors.internalserver  = "internal server error";
-                    return res.status(500).json({errors});
-                }
+    }
+    else if (userNameExist && userNameExist.isVerified) {
+        const auth: boolean = await bcrypt.compare(password, userNameExist.password);
+        if (auth) {
+            if (process.env.JWT_SECRET) {
+                const token: string = jwt.sign({ id: userNameExist._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
+                return res.status(201).json({ token: token, user: userNameExist });
             } else {
-                errors.password = "wrong password";
-                return res.status(404).json({ errors });
-            }
 
-        }else if((userNameExist || emailExist) && user && !user.isVerified){
-            errors.email = "email not verified";
-            return res.status(404).json({errors});
+                console.log('empty jwt secret key');
+                errors.internalserver = "internal server error";
+                return res.status(500).json({ errors });
+            }
+        } else {
+            errors.password = "wrong password";
+            return res.status(404).json({ errors });
         }
-        else{
-            errors.username = "email or username not found";
-            return res.status(404).json({errors});
-        }
+
+    } else if ((userNameExist || emailExist) && user && !user.isVerified) {
+        errors.email = "email not verified";
+        return res.status(404).json({ errors });
+    }
+    else {
+        errors.username = "email or username not found";
+        return res.status(404).json({ errors });
+    }
     // }
 
 
 }
 
-export const emailVerfication = async(req:Request,res:Response)=>{
+export const emailVerfication = async (req: Request, res: Response) => {
     setError();
-    const {token} = req.query;
-    if( token && typeof token === 'string'){
+    const { token } = req.query;
+    if (token && typeof token === 'string') {
         const emailVerificationToken = crypto.createHash('sha256').update(token).digest('hex');
         const user = await User.findOne({
             emailVerificationToken,
             emailVerificationExpire: { $gt: Date.now() }
         });
-        if(!user){
+        if (!user) {
             errors.token = "Invalid verification token";
-            return res.status(404).json({errors});
+            return res.status(404).json({ errors });
         }
         user.isVerified = true;
         user.emailVerficationToken = "";
-        user.emailVerificationExpire=0;
+        user.emailVerificationExpire = 0;
         await user.save();
-        res.status(200).json({message:"verified successfully"});
+        res.status(200).json({ message: "verified successfully" });
 
-    }else{
+    } else {
         errors.token = "empty token";
 
+        return res.status(404).json({ errors });
+    }
+
+}
+export const editPassword = async (req: Request, res: Response) => {
+    setError();
+    const { id, password, newPassword } = req.body;
+
+    const user = await User.findById(id);
+    if (!password) {
+        errors.password = "password is required";
+        return res.status(404).json({ errors });
+    }
+    if (!newPassword || newPassword == password) {
+        errors.password = "new password is required and can't be same as old password";
+        return res.status(404).json({ errors });
+    }
+    if (!user) {
+        errors.email = "invalid user";
+        return res.status(404).json({ errors });
+    }
+    const auth =await bcrypt.compare(password,user.password);
+    if(auth){
+        const salt:string = await bcrypt.genSalt(10);
+
+        const hashedPassword:string = await bcrypt.hash(password, salt);
+
+        user.password = hashedPassword;
+        await user.save();
+        return res.status(200).json({message:"Updated successfully",user:user});
+
+    }else{
+
+        errors.password = "wrong password";
         return res.status(404).json({errors});
     }
 
 }
-// export 
 // edit user - change password , edit email // similarly we can implement for forget password
-// export const 
+// export const
 //
 // export default {Register,Login};

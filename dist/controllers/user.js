@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.emailVerfication = exports.Login = exports.Register = void 0;
+exports.editPassword = exports.emailVerfication = exports.Login = exports.Register = void 0;
 const user_1 = __importDefault(require("../models/user"));
 const crypto_1 = __importDefault(require("crypto"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
@@ -192,8 +192,37 @@ const emailVerfication = (req, res) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.emailVerfication = emailVerfication;
-// export 
+const editPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    setError();
+    const { id, password, newPassword } = req.body;
+    const user = yield user_1.default.findById(id);
+    if (!password) {
+        errors.password = "password is required";
+        return res.status(404).json({ errors });
+    }
+    if (!newPassword || newPassword == password) {
+        errors.password = "new password is required and can't be same as old password";
+        return res.status(404).json({ errors });
+    }
+    if (!user) {
+        errors.email = "invalid user";
+        return res.status(404).json({ errors });
+    }
+    const auth = yield bcryptjs_1.default.compare(password, user.password);
+    if (auth) {
+        const salt = yield bcryptjs_1.default.genSalt(10);
+        const hashedPassword = yield bcryptjs_1.default.hash(password, salt);
+        user.password = hashedPassword;
+        yield user.save();
+        return res.status(200).json({ message: "Updated successfully", user: user });
+    }
+    else {
+        errors.password = "wrong password";
+        return res.status(404).json({ errors });
+    }
+});
+exports.editPassword = editPassword;
 // edit user - change password , edit email // similarly we can implement for forget password
-// export const 
+// export const
 //
 // export default {Register,Login};
